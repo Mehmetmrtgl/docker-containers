@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  kaist2bag:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ros1-kaist2bag
+    container_name: kaist2bag
+    privileged: true
+    network_mode: "host"
+    volumes:
+      - /home/path:/data
+    stdin_open: true
+    tty: true
+
