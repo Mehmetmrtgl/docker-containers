@@ -10,7 +10,7 @@ services:
     privileged: true
     network_mode: "host"
     volumes:
-      - /home/path:/data
+      - /home/mehmet/urban39-pankyo:/data
     stdin_open: true
     tty: true
 
