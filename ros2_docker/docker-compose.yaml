@@ -19,6 +19,6 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       
-      - ./datas:/home/ros/ros2_ws/datas
+      - /media/mehmet/Elements/datas:/home/ros/ros2_ws/datas
     stdin_open: true
     tty: true

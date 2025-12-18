@@ -7,6 +7,6 @@ services:
     restart: "no"
     volumes:
       # Host yolunu aynen bağlıyoruz
-      - /home/mehmet/urban39-pankyo/bag:/ros_ws/data
+      - /media/mehmet/Elements/bag:/ros_ws/data
     tty: true
     stdin_open: true
