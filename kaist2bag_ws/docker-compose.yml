@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   kaist2bag:
     build:
@@ -10,7 +8,8 @@ services:
     privileged: true
     network_mode: "host"
     volumes:
-      - /home/mehmet/urban39-pankyo:/data
+      - /media/mehmet/Elements/urban39:/dataset:ro
+      - /media/mehmet/Elements/bag:/output
     stdin_open: true
     tty: true
 
