@@ -8,6 +8,8 @@ if [ "$#" -ne 1 ]; then
 fi
 
 BAG_PATH=$1
+
+BAG_DIR=$(dirname "$BAG_PATH")
 BAG_FILE=$(basename "$BAG_PATH")
 BAG_NAME="${BAG_FILE%.*}"
 
@@ -41,9 +43,9 @@ rosrun kalibr kalibr_calibrate_cameras \
   --show-extraction
 
 
-mv "${BAG_NAME}-camchain.yaml" "$STATIC_DIR/static-camchain.yaml"
-mv "${BAG_NAME}-report-cam.pdf" "$STATIC_DIR/static-report-cam.pdf"
-mv "${BAG_NAME}-results-cam.txt" "$STATIC_DIR/static-results-cam.txt"
+mv "$BAG_DIR/${BAG_NAME}-camchain.yaml" "$STATIC_DIR/static-camchain.yaml"
+mv "$BAG_DIR/${BAG_NAME}-report-cam.pdf" "$STATIC_DIR/static-report-cam.pdf"
+mv "$BAG_DIR/${BAG_NAME}-results-cam.txt" "$STATIC_DIR/static-results-cam.txt"
 
 echo "------------------------------------------"
 echo "Bitti! Dosyalar şurada: $STATIC_DIR"
