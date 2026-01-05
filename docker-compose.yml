@@ -1,0 +1,42 @@
+services:
+  allan:
+    build: ./allan_variance_ros
+    container_name: allan_variance_container
+    privileged: true
+    network_mode: "host"
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./allan_variance_ros/data:/root/catkin_ws/data
+      - ./allan_variance_ros/script/run_analysis.sh:/root/catkin_ws/run_analysis.sh
+    stdin_open: true
+    tty: true
+    
+  kaist:
+    build: ./kaist2bag_ws
+    container_name: kaist2bag_container
+    privileged: true
+    network_mode: "host"
+    volumes:
+      - /media/mehmet/Elements/urban39:/dataset:ro
+      - /media/mehmet/Elements/bag:/output 
+    stdin_open: true
+    tty: true
+    
+  kalibr:
+    build: ./kalibr
+    container_name: kalibr_container
+    privileged: true
+    network_mode: "host"
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./kalibr/data:/root/catkin_ws/data
+      - ./kalibr/script:/root/catkin_ws/scripts
+      - ./kalibr/april_6x6_80x80cm.yaml:/root/catkin_ws/april_6x6_80x80cm.yaml
+    stdin_open: true
+    tty: true
