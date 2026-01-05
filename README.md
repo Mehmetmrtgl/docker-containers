@@ -53,7 +53,7 @@ docker compose build allan_variance_ros
 ```bash
 docker compose build kaist2bag_ws
 ```
-## 🚀 Services (Modules)
+## Services (Modules)
 
 For detailed usage, scripts, and configuration for each tool, please refer to the **README.md** files inside their respective directories:
 
@@ -70,7 +70,7 @@ For detailed usage, scripts, and configuration for each tool, please refer to th
 
 
 
-## ⚙️ Global Configuration
+## Global Configuration
 
 ### Data Volumes
 
