@@ -1,154 +1,92 @@
-# ROS Docker Ecosystem 
+# ROS Docker Workspace
 
-A modular Docker collection designed for seamless robotics data engineering. This toolkit handles everything from raw KAIST dataset extraction to modern ROS 2 Humble development.
+This repository hosts a modular ROS 1 development ecosystem. It uses a unified Docker structure to manage multiple robotics tools (Calibration, IMU Analysis, Dataset Conversion) using a single shared base image.
 
-## Project Structure
+Each tool resides in its own directory with specific documentation, keeping the project organized and easy to maintain.
+
+##  Repository Structure
+
+The workspace is organized as a flat hierarchy managed by a central `docker-compose.yml`:
+
+```text
+.
+├── allan_variance_ros/    # IMU Noise Analysis modules
+├── kaist2bag_ws/          # Dataset conversion tools
+├── kalibr/                # Camera/IMU calibration tools
+├── docker-compose.yml     # Central orchestration for all services
+├── ros1_base.Dockerfile   # Shared ROS Noetic Base Image
+└── README.md              # Global documentation
+
 ```
-docker-containers/
-├── convert_bags/      # Python 3.11 + ROS Noetic (for rosbags conversion)
-├── kaist2bag_ws/      # ROS Noetic + KAIST2BAG parser
-└── ros2_docker/       # ROS 2 Humble Desktop (Development Env)
-```
 
-## Prerequisites
+##  Architecture & Build
 
-    Docker and Docker Compose installed.
+This ecosystem relies on a **Single Base Image Strategy**. The `ros1_base.Dockerfile` in the root directory serves as the foundation for all services. This ensures that all tools use the exact same OS and ROS versions without downloading dependencies multiple times.
 
-    (Optional) NVIDIA Container Toolkit for GPU acceleration in ROS 2.
-### Removing old Docker versions (if any)
-  ```bash
-sudo apt remove -y docker docker-engine docker.io containerd runc
-```
-### Update Package List
+* **Consistency:** All tools use the exact same OS and ROS versions.
+* **Efficiency:** Dependencies are downloaded and cached only once.
+
+### Building the Ecosystem
+
+#### Option 1: Build Everything (Recommended for first setup) This builds the base image and all registered services.
+
 ```bash
-sudo apt update
+docker compose build
+
 ```
 
-### Installation of Necessary Packages
+#### Option 2: Build Individual Services If you only want to update or rebuild a specific tool:
+
+
+#### Build only the Calibration tool
+
 ```bash
-sudo apt install -y \
-    ca-certificates \
-    curl \
-    gnupg \
-    lsb-release
+docker compose build kalibr
 ```
-### Adding Docker's Official GPG Key
+
+#### Build only the IMU Analysis tool
 ```bash
-sudo mkdir -p /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
-sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+docker compose build allan_variance_ros
 ```
-### Adding a Docker Repository to the System
+#### Build only the Dataset Converter
 ```bash
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
-  https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+docker compose build kaist2bag_ws
 ```
+## 🚀 Services (Modules)
 
-### Update Package List
-```bash
-sudo apt update
-```
+For detailed usage, scripts, and configuration for each tool, please refer to the **README.md** files inside their respective directories:
 
-### Docker Engine Installation
-```bash
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-```
+* **[📂 kalibr/]([https://www.google.com/search?q=./kalibr/](https://github.com/ethz-asl/kalibr))**
+* Automated Camera & IMU calibration (Static/Dynamic) workflows.
 
-### How to use Docker without Sudo.
-```bash
-sudo usermod -aG docker $USER
-newgrp docker
-reboot
-```
-## Containers Overview
-### 1. KAIST2BAG (kaist2bag_ws)
 
-Purpose: Converts the raw KAIST Urban Data Set into standard ROS 1 .bag files.
+* **[📂 allan_variance_ros/]([https://www.google.com/search?q=./allan_variance_ros/](https://github.com/ori-drs/allan_variance_ros))**
+* IMU noise characterization and parameter extraction.
 
-    Base Image: ubuntu:20.04 (ROS Noetic installed manually).
 
-    Key Features: Includes irp_sen_msg and kaist2bag packages.
-
-    Volumes: * Input: /your/dataset/file/path (Read-only)
-
-    Output: /your/bag/file/path
-
-### 2. ROS Bags Converter (convert_bags)
-
-Purpose: A specialized environment to migrate or modify ROS bags using the rosbags Python library.
-
-    Base Image: ros:noetic-ros-base.
-
-    Key Features: Custom compiled Python 3.11.9 (using altinstall to avoid breaking system ROS tools) and the rosbags high-performance migration library.
-
-    Use Case: Converting .bag (ROS 1) to .mcap or .db3 (ROS 2).
-
-### 3. ROS 2 Humble Dev (ros2_docker)
-
-Purpose: A full desktop-class ROS 2 development environment.
-
-    Base Image: osrf/ros:humble-desktop.
-
-    Key Features: * Non-root user (ros) mapping to host UID 1000 for permission harmony.
-
-        GUI support (X11 forwarding).
-
-        NVIDIA GPU support (requires nvidia-container-toolkit).
-
-    Tools: colcon, terminator, git.
+* **[📂 kaist2bag_ws/]([https://www.google.com/search?q=./kaist2bag_ws/](https://github.com/rpng/kaist2bag))**
+* Tools for parsing and converting raw KAIST Urban datasets.
 
 
 
-## Configuration Details
-### Volume Mapping
+## ⚙️ Global Configuration
 
-Ensure your external drives or data paths match the volumes section in each docker-compose.yml:
+### Data Volumes
 
-    Default Data Path: /media/mehmet/Elements/...
+By default, the `docker-compose.yml` mounts the `./data` directory to all containers to share bags and results easily:
 
-    If your drive name is different, update the left side of the : in the .yml files.
-
-### Aligning KAIST2BAG Paths
-
-The kaist2bag tool relies on a config.yaml file to locate your data. By default, the source code points to local paths (e.g., /home/tao/...). You must update this inside the container to match the Docker volume mount points.
-
-1. Locate the config file:
-```Bash
-docker exec -it kaist2bag bash
-nano /root/ws/src/kaist2bag/config/config.yaml
-```
-2. Update the paths as follows:
-   
-| Parameter | Default (Incorrect) | For Docker (Correct) | 
-|---|---|---|
-| dataset | /home/tao/sda/dataset/... | /dataset |   
-| save_to | /home/tao/sda/dataset/.../bag | /output | 
-
-
-### Data Mapping Reference
-
-To ensure your files are saved correctly to your external drive, verify your docker-compose.yml volume mappings:
-```YAML
-
+```yaml
 volumes:
-  - /media/mehmet/Elements/urban39:/dataset:ro  # <--- Source Raw Data
-  - /media/mehmet/Elements/bag:/output          # <--- Target .bag Destination
+  - ./data:/root/catkin_ws/data
+
 ```
 
-### GUI Forwarding (ROS 2)
+### GUI Support
 
-To see Rviz or Gazebo from the ROS 2 container, run this on your host machine before starting the container:
-Bash
+All containers are configured for X11 forwarding. To enable visualization (Rviz/Plots) on the host:
 
+```bash
 xhost +local:docker
 
-🛠 Troubleshooting
-
-    Permissions: The ROS 2 container uses UID 1000. If your host user is not 1000, change the args in ros2_docker/docker-compose.yml.
-
-    Python Versions: In the convert_bags container, always use python3.11 to access the modern libraries; python3 refers to the system's ROS Noetic default (3.8).
-
-Would you like me to create a specific entrypoint.sh script for any of these containers to automate the sourcing of workspaces?
+```
